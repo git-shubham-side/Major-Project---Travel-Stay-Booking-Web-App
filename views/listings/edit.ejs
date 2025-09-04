@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wanderlust</title>
+  </head>
+  <body>
+    <div class="row mt-5 mb-3">
+      <div class="col-8 offset-2">
+        <%layout("layouts/boilerplate")%>
+        <h3>Edit Your Listing</h3>
+
+        <form
+          action="/listings/<%=data._id%>?_method=PUT"
+          method="POST"
+          class="needs-validation"
+          novalidate
+        >
+          <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input
+              type="text"
+              name="listing[title]"
+              value="<%=data.title%>"
+              class="form-control"
+              required
+            />
+            <div class="invalid-feedback">Please enter a title</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea
+              name="listing[description]"
+              id="description"
+              value="<%=data.description%>"
+              class="form-control"
+              required
+            >
+<%=data.description%></textarea
+            >
+            <div class="invalid-feedback">Please enter a valid description</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="image" class="form-label">Image URL</label>
+            <input
+              type="text"
+              name="listing[image.url]"
+              id="image"
+              value="<%=data.image.url%>"
+              class="form-control"
+              required
+            />
+            <div class="invalid-feedback">Please enter a valid Image URL</div>
+          </div>
+
+          <div class="row">
+            <div class="mb-3 col-md-6">
+              <label for="price" class="form-label">Price</label>
+              <input
+                type="number"
+                name="listing[price]"
+                id="price"
+                value="<%=data.price%>"
+                class="form-control"
+                required
+              />
+              <div class="invalid-feedback">Please enter a valid Price</div>
+            </div>
+
+            <div class="mb-3 col-md-6">
+              <label for="location" class="form-label">Location</label>
+              <input
+                type="text"
+                name="listing[location]"
+                id="location"
+                value="<%=data.location%>"
+                class="form-control"
+                required
+              />
+              <div class="invalid-feedback">Please enter a valid location</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="country" class="form-label">Country</label>
+            <input
+              type="text"
+              name="listing[country]"
+              id="country"
+              value="<%=data.country%>"
+              class="form-control"
+              required
+            />
+            <div class="invalid-feedback">Please enter a valid country</div>
+          </div>
+
+          <button type="submit" class="btn btn-dark add-btn">Edit</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

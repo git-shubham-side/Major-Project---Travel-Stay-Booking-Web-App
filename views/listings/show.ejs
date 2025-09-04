@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WanderLust</title>
+  </head>
+  <body>
+    <%layout("layouts/boilerplate")%>
+    <div class="row mt-4 mb-5">
+      <div class="col-6 offset-3">
+        <h3><%-data.title%></h3>
+      </div>
+      <div class="card col-6 offset-3">
+        <img
+          src="<%-data.image.url%>"
+          class="card-img-top show-img"
+          alt="Listing-image"
+        />
+        <div class="card-body">
+          <b>Description:</b><%-data.description%> <br />
+          <b>Price:</b
+          ><%-data.price.toLocaleString("en-IN",{style:"currency",currency:"INR"})%>
+          <br />
+          <b>Location:</b><%-data.location%> <br />
+          <b>Country:</b><%-data.country%>
+        </div>
+      </div>
+      <div class="show-btns">
+        <a
+          href="/listings/<%-data._id%>/edit"
+          class="btn btn-dark col-1 offset-3 add-btn"
+          >Edit</a
+        >
+        <form action="/listings/<%=data._id%>?_method=DELETE" method="POST">
+          <button type="sumbit" class="btn btn-dark offset-4">Delete</button>
+        </form>
+      </div>
+    </div>
+    <hr>
+     <div class="col-6 offset-3 mb-3">
+        <h3>Reviews</h3>
+        <form action="/listings/<%-data._id%>/reviews" method="POST">
+          <div class="mb-3">
+            <label for="rating" >Rating</label>
+            <input type="range" name="review[rating]" id="rating"  required min="1" max="5" class="form-range">
+          </div>
+          <div class="mb-3">
+            <label for="comment" >Comment</label>
+            <textarea name="review[comment]" id="comment" class="form-control" required></textarea>
+          </div>
+        <button type="submit" class="btn btn-dark">Submit</button>
+        </form>
+      </div>
+   
+    </div>
+  </body>
+</html>
