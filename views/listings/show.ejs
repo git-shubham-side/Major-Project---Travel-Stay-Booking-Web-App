@@ -11,7 +11,7 @@
       <div class="col-6 offset-3">
         <h3><%-data.title%></h3>
       </div>
-      <div class="card col-6 offset-3">
+      <div class="card col-6 offset-3 listing-card">
         <img
           src="<%-data.image.url%>"
           class="card-img-top show-img"
@@ -38,21 +38,49 @@
       </div>
     </div>
     <hr>
+
+    <!-- Reviews section -->
+
+
      <div class="col-6 offset-3 mb-3">
         <h3>Reviews</h3>
-        <form action="/listings/<%-data._id%>/reviews" method="POST">
+
+        <form action="/listings/<%-data._id%>/reviews" method="POST" novalidate class="needs-validation">
           <div class="mb-3">
             <label for="rating" >Rating</label>
-            <input type="range" name="review[rating]" id="rating"  required min="1" max="5" class="form-range">
+            <input type="range" name="review[rating]" id="rating"  min="1" max="5" class="form-range">
           </div>
+
           <div class="mb-3">
             <label for="comment" >Comment</label>
             <textarea name="review[comment]" id="comment" class="form-control" required></textarea>
+            <div  class="invalid-feedback">
+            Please add some comments for review.
+          </div>
           </div>
         <button type="submit" class="btn btn-dark">Submit</button>
         </form>
       </div>
    
+      <div class="col-6 offset-3 mb-3">
+      <hr>
+     <p><b>All Reviews</b></p>
+     <div class="row">
+
+      <%for(let review of data.reviews){%>
+        <div class="card col-5 ms-3 mb-3 pt-2">
+          <div class="card-body">
+            <p class="card-text"><%-review.comment%></p>
+            <p class="card-text"><%-review.rating%> <span style="color: gold;">&#9733;</span></p>
+          <form action="/listings/<%-data._id%>/reviews/<%-review._id%>?_method=DELETE" class="mb-3" method="POST">
+            <button class="btn btn-dark">Delete</button>
+          </form>
+           </div>
+        </div>
+      <%}%>
+
+     </div>
+      </div>
     </div>
   </body>
 </html>

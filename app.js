@@ -8,12 +8,13 @@ const ejsMate = require("ejs-mate");
 //Listing Model require
 const Listing = require("./models/listings.js");
 const Review = require("./models/reviews.js");
-const { engine } = require("express/lib/application");
+const { engine, all } = require("express/lib/application");
 const ExpressError = require("./utils/ExpressError.js");
 
 //Joi Validator
 const Joi = require("joi");
-const ListingSchema = require("./JoiValidator.js");
+const { ListingSchema } = require("./JoiValidator.js");
+const { ReviewSchema } = require("./JoiValidator.js");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -34,9 +35,21 @@ main()
     console.log(err);
   });
 
-//Validation Function
+//Validation Function for Listing
 function listingValidator(req, res, next) {
-  let { error } = ListingSchema.validate(req.body.listing);
+  let { error } = ListingSchema.validate(req.body);
+  if (error) {
+    console.log(req.body);
+    console.log("Listing Middleware probem");
+    throw new ExpressError(400, error.message);
+  } else {
+    next();
+  }
+}
+
+//Validation Function For Reviews
+function ReviewValidator(req, res, next) {
+  let { error } = ReviewSchema.validate(req.body);
   if (error) {
     throw new ExpressError(400, error.message);
   } else {
@@ -44,7 +57,7 @@ function listingValidator(req, res, next) {
   }
 }
 
-//Routing ----------
+//Routing ---------- Index Route
 app.get("/", (req, res) => {
   res.redirect("/listings");
 });
@@ -69,7 +82,8 @@ app.get("/listings/new", (req, res) => {
 app.get("/listings/:id", async (req, res, next) => {
   try {
     let id = req.params.id;
-    let data = await Listing.findById(id);
+    let data = await Listing.findById(id).populate("reviews");
+
     res.render("listings/show", { data });
   } catch (err) {
     next(err);
@@ -112,7 +126,6 @@ app.delete("/listings/:id", async (req, res, next) => {
   try {
     let result = await Listing.findByIdAndDelete(id);
     if (result) {
-      console.log("Listing  is deleted", result);
       res.redirect("/listings");
     } else {
       console.log("Listing Not Found!");
@@ -123,20 +136,28 @@ app.delete("/listings/:id", async (req, res, next) => {
   }
 });
 
-//Reviews
-app.post("/listings/:id/reviews", async (req, res) => {
+//Reviews POST
+app.post("/listings/:id/reviews", ReviewValidator, async (req, res) => {
   try {
     let listing = await Listing.findById(req.params.id);
     let review = await new Review(req.body.review);
-
     listing.reviews.push(review);
 
     await review.save();
     await listing.save();
-    res.json({ request: "Accepted" });
+    res.redirect(`/listings/${listing._id}`);
   } catch (err) {
     console.log(err);
   }
+});
+
+//Delte Review Route POST
+app.delete("/listings/:id/reviews/:reviewId", async (req, res) => {
+  let { id, reviewId } = req.params;
+
+  await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+  await Review.findOneAndDelete(reviewId);
+  res.redirect(`/listings/${id}`);
 });
 
 //Random routes error
