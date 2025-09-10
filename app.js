@@ -10,6 +10,8 @@ const Listing = require("./models/listings.js");
 const Review = require("./models/reviews.js");
 const { engine, all } = require("express/lib/application");
 const ExpressError = require("./utils/ExpressError.js");
+const listings = require("./routes/listing-route.js");
+const reviews = require("./routes/reviews-routes.js");
 
 //Joi Validator
 const Joi = require("joi");
@@ -35,130 +37,10 @@ main()
     console.log(err);
   });
 
-//Validation Function for Listing
-function listingValidator(req, res, next) {
-  let { error } = ListingSchema.validate(req.body);
-  if (error) {
-    console.log(req.body);
-    console.log("Listing Middleware probem");
-    throw new ExpressError(400, error.message);
-  } else {
-    next();
-  }
-}
-
-//Validation Function For Reviews
-function ReviewValidator(req, res, next) {
-  let { error } = ReviewSchema.validate(req.body);
-  if (error) {
-    throw new ExpressError(400, error.message);
-  } else {
-    next();
-  }
-}
-
-//Routing ---------- Index Route
-app.get("/", (req, res) => {
-  res.redirect("/listings");
-});
-
-//Index Route ----------------
-app.get("/listings", async (req, res) => {
-  try {
-    let alllist = await Listing.find({});
-    res.render("listings/index", { alllist });
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Server Error");
-  }
-});
-
-//New Route--------------
-app.get("/listings/new", (req, res) => {
-  res.render("listings/create");
-});
-
-//Show Route-----------------
-app.get("/listings/:id", async (req, res, next) => {
-  try {
-    let id = req.params.id;
-    let data = await Listing.findById(id).populate("reviews");
-
-    res.render("listings/show", { data });
-  } catch (err) {
-    next(err);
-  }
-});
-
-//Create Route---  & Joi Middleware as ListingValidator
-app.post("/listings", listingValidator, async (req, res, next) => {
-  try {
-    let listing = await new Listing(req.body.listing);
-    await listing.save();
-    res.redirect("/listings");
-  } catch (err) {
-    next(err);
-  }
-});
-
-//Edit Route-----------
-app.get("/listings/:id/edit", async (req, res) => {
-  let id = req.params.id;
-  let data = await Listing.findById(id);
-  res.render("listings/edit", { data });
-});
-
-//Edit PUT Route & Joi Listing Validator
-app.put("/listings/:id", listingValidator, async (req, res) => {
-  let id = req.params.id;
-  let listing = req.body.listing;
-
-  await Listing.findByIdAndUpdate(id, listing, {
-    new: true,
-    runValidators: true,
-  });
-  res.redirect(`/listings/${id}`);
-});
-
-//Destroy Route--Delete Route------
-app.delete("/listings/:id", async (req, res, next) => {
-  let id = req.params.id;
-  try {
-    let result = await Listing.findByIdAndDelete(id);
-    if (result) {
-      res.redirect("/listings");
-    } else {
-      console.log("Listing Not Found!");
-    }
-  } catch (err) {
-    // console.log("Error Catch", err);
-    next(new ExpressError(409, "Error Occured!"));
-  }
-});
-
-//Reviews POST
-app.post("/listings/:id/reviews", ReviewValidator, async (req, res) => {
-  try {
-    let listing = await Listing.findById(req.params.id);
-    let review = await new Review(req.body.review);
-    listing.reviews.push(review);
-
-    await review.save();
-    await listing.save();
-    res.redirect(`/listings/${listing._id}`);
-  } catch (err) {
-    console.log(err);
-  }
-});
-
-//Delte Review Route POST
-app.delete("/listings/:id/reviews/:reviewId", async (req, res) => {
-  let { id, reviewId } = req.params;
-
-  await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-  await Review.findOneAndDelete(reviewId);
-  res.redirect(`/listings/${id}`);
-});
+//Listing Routes--
+app.use("/listings", listings);
+//Reviews Routes--
+app.use("/listings", reviews);
 
 //Random routes error
 app.all(/.*/, (req, res, next) => {
